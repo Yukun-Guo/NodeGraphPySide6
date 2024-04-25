@@ -1,6 +1,6 @@
 
 # NodeGraphQt
-
+## Rewrite in PySide6
 [![API Documentation](https://github.com/jchanvfx/NodeGraphQt/actions/workflows/sphinx_doc_build.yml/badge.svg)](https://github.com/jchanvfx/NodeGraphQt/actions/workflows/sphinx_doc_build.yml)
 [![PyPI Package](https://github.com/jchanvfx/NodeGraphQt/actions/workflows/pypi_publish.yml/badge.svg)](https://github.com/jchanvfx/NodeGraphQt/actions/workflows/pypi_publish.yml)
 ![GitHub Repo stars](https://img.shields.io/github/stars/jchanvfx/NodeGraphQt?style=social)
