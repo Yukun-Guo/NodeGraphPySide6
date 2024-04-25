@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import math
 
-from Qt import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from NodeGraphQt.constants import (
     LayoutDirectionEnum,
@@ -30,7 +30,7 @@ class PipeItem(QtWidgets.QGraphicsPathItem):
         super(PipeItem, self).__init__()
         self.setZValue(Z_VAL_PIPE)
         self.setAcceptHoverEvents(True)
-        self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
+        self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
         self.setCacheMode(ITEM_CACHE_MODE)
 
         self._color = PipeEnum.COLOR.value
@@ -48,7 +48,7 @@ class PipeItem(QtWidgets.QGraphicsPathItem):
 
         self._dir_pointer = QtWidgets.QGraphicsPolygonItem(self)
         self._dir_pointer.setPolygon(self._poly)
-        self._dir_pointer.setFlag(self.ItemIsSelectable, False)
+        self._dir_pointer.setFlag(self.GraphicsItemFlag.ItemIsSelectable, False)
 
         self.reset()
 
@@ -72,7 +72,7 @@ class PipeItem(QtWidgets.QGraphicsPathItem):
             self.highlight()
 
     def itemChange(self, change, value):
-        if change == self.ItemSelectedChange and self.scene():
+        if change == self.GraphicsItemChange.ItemSelectedChange and self.scene():
             if value:
                 self.highlight()
             else:
@@ -100,7 +100,7 @@ class PipeItem(QtWidgets.QGraphicsPathItem):
 
         painter.setPen(pen)
         painter.setBrush(self.brush())
-        painter.setRenderHint(painter.Antialiasing, True)
+        painter.setRenderHint(painter.RenderHint.Antialiasing, True)
         painter.drawPath(self.path())
 
         # QPaintDevice: Cannot destroy paint device that is being painted.
@@ -649,7 +649,7 @@ class LivePipePolygonItem(QtWidgets.QGraphicsPolygonItem):
 
     def __init__(self, parent):
         super(LivePipePolygonItem, self).__init__(parent)
-        self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
 
     def paint(self, painter, option, widget):
         """

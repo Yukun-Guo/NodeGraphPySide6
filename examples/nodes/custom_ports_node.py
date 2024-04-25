@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from Qt import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 
 from NodeGraphQt import BaseNode
 

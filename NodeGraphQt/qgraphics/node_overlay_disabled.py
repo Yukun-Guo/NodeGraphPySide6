@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from Qt import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from NodeGraphQt.constants import Z_VAL_NODE_WIDGET
 
@@ -87,7 +87,7 @@ class XDisabledItem(QtWidgets.QGraphicsItem):
 
             painter.setFont(font)
             font_metrics = QtGui.QFontMetrics(font)
-            font_width = font_metrics.width(self.text)
+            font_width = font_metrics.horizontalAdvance(self.text)
             font_height = font_metrics.height()
             txt_w = font_width * 1.25
             txt_h = font_height * 2.25

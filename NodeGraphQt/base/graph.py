@@ -5,7 +5,7 @@ import json
 import os
 import re
 
-from Qt import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets,QtGui
 
 from NodeGraphQt.base.commands import (NodeAddedCmd,
                                        NodesRemovedCmd,
@@ -150,7 +150,7 @@ class NodeGraph(QtCore.QObject):
             kwargs.get('node_factory') or NodeFactory())
         self._undo_view = None
         self._undo_stack = (
-            kwargs.get('undo_stack') or QtWidgets.QUndoStack(self)
+            kwargs.get('undo_stack') or QtGui.QUndoStack(self)
         )
         self._widget = None
         self._sub_graphs = {}
@@ -188,8 +188,7 @@ class NodeGraph(QtCore.QObject):
         self._wire_signals()
 
     def __repr__(self):
-        return '<{}("root") object at {}>'.format(
-            self.__class__.__name__, hex(id(self)))
+        return f'<{self.__class__.__name__}("root") object at {hex(id(self))}>'
 
     def _register_context_menu(self):
         """
@@ -354,8 +353,8 @@ class NodeGraph(QtCore.QObject):
             mimedata (QtCore.QMimeData): mime data.
             pos (QtCore.QPoint): scene position relative to the drop.
         """
-        uri_regex = re.compile(r'{}(?:/*)([\w/]+)(\.\w+)'.format(URI_SCHEME))
-        urn_regex = re.compile(r'{}([\w\.:;]+)'.format(URN_SCHEME))
+        uri_regex = re.compile(f'{URI_SCHEME}(?:/*)([\w/]+)(\.\w+)')
+        urn_regex = re.compile(f'{URN_SCHEME}([\w\.:;]+)')
         if mimedata.hasFormat(MIME_TYPE):
             data = mimedata.data(MIME_TYPE).data().decode()
             urn_search = urn_regex.search(data)
@@ -385,7 +384,7 @@ class NodeGraph(QtCore.QObject):
                         path = uri_search.group(1)
                         ext = uri_search.group(2)
                         try:
-                            self.import_session('{}{}'.format(path, ext))
+                            self.import_session(f'{path}{ext}')
                         except Exception as e:
                             not_supported_urls.append(url)
 
@@ -519,7 +518,7 @@ class NodeGraph(QtCore.QObject):
             self._widget.addTab(self._viewer, 'Node Graph')
             # hide the close button on the first tab.
             tab_bar = self._widget.tabBar()
-            for btn_flag in [tab_bar.RightSide, tab_bar.LeftSide]:
+            for btn_flag in [tab_bar.ButtonPosition.RightSide, tab_bar.ButtonPosition.LeftSide]:
                 tab_btn = tab_bar.tabButton(0, btn_flag)
                 if tab_btn:
                     tab_btn.deleteLater()
@@ -892,7 +891,7 @@ class NodeGraph(QtCore.QObject):
 
         menu = menu or 'graph'
         if not os.path.isfile(file_path):
-            raise IOError('file doesn\'t exists: "{}"'.format(file_path))
+            raise IOError(f"""file doesn\'t exists: "{file_path}\"""")
 
         with open(file_path) as f:
             data = json.load(f)
@@ -2880,8 +2879,7 @@ class SubGraph(NodeGraph):
                 # note: port nodes can only be deleted by deleting the parent
                 #       port object.
                 raise NodeDeletionError(
-                    '{} can\'t be deleted as it is attached to a port!'
-                    .format(node)
+                    f"{node} can\'t be deleted as it is attached to a port!"
                 )
 
         super(SubGraph, self).delete_nodes(nodes, push_undo=push_undo)

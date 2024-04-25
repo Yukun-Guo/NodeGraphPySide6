@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from collections import defaultdict
 
-from Qt import QtWidgets, QtCore, QtGui, QtCompat
+from PySide6 import QtWidgets, QtCore, QtGui
 
 from .node_property_factory import NodePropertyWidgetFactory
 from .prop_widgets_base import PropLineEdit
@@ -54,10 +54,10 @@ class _PropertiesList(QtWidgets.QTableWidget):
         self.verticalHeader().hide()
         self.horizontalHeader().hide()
 
-        QtCompat.QHeaderView.setSectionResizeMode(
+        QtWidgets.QHeaderView.setSectionResizeMode(
             self.verticalHeader(), QtWidgets.QHeaderView.ResizeToContents
         )
-        QtCompat.QHeaderView.setSectionResizeMode(
+        QtWidgets.QHeaderView.setSectionResizeMode(
             self.horizontalHeader(), 0, QtWidgets.QHeaderView.Stretch
         )
         self.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
@@ -218,8 +218,8 @@ class _PortConnectionsContainer(QtWidgets.QWidget):
         tree_widget.setHeaderLabels(headers)
         tree_widget.setHeaderHidden(False)
         tree_widget.header().setStretchLastSection(False)
-        QtCompat.QHeaderView.setSectionResizeMode(
-            tree_widget.header(), 2, QtWidgets.QHeaderView.Stretch
+        QtWidgets.QHeaderView.setSectionResizeMode(
+            tree_widget.header(), 2, QtWidgets.QHeaderView.ResizeMode.Stretch
         )
 
         group_box.layout().addWidget(tree_widget)
@@ -235,7 +235,7 @@ class _PortConnectionsContainer(QtWidgets.QWidget):
             port (NodeGraphQt.Port): port object.
         """
         item = QtWidgets.QTreeWidgetItem(tree)
-        item.setFlags(item.flags() & ~QtCore.Qt.ItemIsSelectable)
+        item.setFlags(item.flags() & ~QtCore.Qt.ItemFlag.ItemIsSelectable)
         item.setText(1, port.name())
         item.setToolTip(0, 'Lock Port')
         item.setToolTip(1, 'Port Name')

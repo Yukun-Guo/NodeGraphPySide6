@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from Qt import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from NodeGraphQt.constants import ViewerEnum
 

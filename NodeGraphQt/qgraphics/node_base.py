@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from collections import OrderedDict
 
-from Qt import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from NodeGraphQt.constants import (
     ITEM_CACHE_MODE,
@@ -258,7 +258,7 @@ class NodeItem(AbstractNodeItem):
             change:
             value:
         """
-        if change == self.ItemSelectedChange and self.scene():
+        if change == self.GraphicsItemChange.ItemSelectedChange and self.scene():
             self.reset_pipes()
             if value:
                 self.highlight_pipes()

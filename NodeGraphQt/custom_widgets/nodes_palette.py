@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 
-from Qt import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore, QtGui
 
 from NodeGraphQt.constants import MIME_TYPE, URN_SCHEME
 
@@ -136,11 +136,11 @@ class NodesGridView(QtWidgets.QListView):
 
     def __init__(self, parent=None):
         super(NodesGridView, self).__init__(parent)
-        self.setSelectionMode(self.ExtendedSelection)
+        self.setSelectionMode(self.SelectionMode.ExtendedSelection)
         self.setUniformItemSizes(True)
-        self.setResizeMode(self.Adjust)
-        self.setViewMode(self.IconMode)
-        self.setDragDropMode(self.DragOnly)
+        self.setResizeMode(self.ResizeMode.Adjust)
+        self.setViewMode(self.ViewMode.IconMode)
+        self.setDragDropMode(self.DragDropMode.DragOnly)
         self.setDragEnabled(True)
         self.setMinimumSize(300, 100)
         self.setSpacing(4)

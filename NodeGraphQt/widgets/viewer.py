@@ -3,7 +3,7 @@
 import math
 from distutils.version import LooseVersion
 
-from Qt import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from NodeGraphQt.base.menu import BaseMenu
 from NodeGraphQt.constants import (
@@ -102,7 +102,7 @@ class NodeViewer(QtWidgets.QGraphicsView):
         )))
         text_color.setAlpha(50)
         self._cursor_text = QtWidgets.QGraphicsTextItem()
-        self._cursor_text.setFlag(self._cursor_text.ItemIsSelectable, False)
+        self._cursor_text.setFlag(self._cursor_text.GraphicsItemFlag.ItemIsSelectable, False)
         self._cursor_text.setDefaultTextColor(text_color)
         self._cursor_text.setZValue(Z_VAL_PIPE - 1)
         font = self._cursor_text.font()
@@ -510,11 +510,11 @@ class NodeViewer(QtWidgets.QGraphicsView):
             super(NodeViewer, self).mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
             self.LMB_state = False
-        elif event.button() == QtCore.Qt.RightButton:
+        elif event.button() == QtCore.Qt.MouseButton.RightButton:
             self.RMB_state = False
-        elif event.button() == QtCore.Qt.MiddleButton:
+        elif event.button() == QtCore.Qt.MouseButton.MiddleButton:
             self.MMB_state = False
 
         # hide pipe slicer.
@@ -615,6 +615,7 @@ class NodeViewer(QtWidgets.QGraphicsView):
                 path = QtGui.QPainterPath()
                 path.addRect(map_rect)
                 self._rubber_band.setGeometry(rect)
+
                 self.scene().setSelectionArea(
                     path, QtCore.Qt.IntersectsItemShape
                 )
@@ -667,11 +668,11 @@ class NodeViewer(QtWidgets.QGraphicsView):
             delta = event.angleDelta().y()
             if delta == 0:
                 delta = event.angleDelta().x()
-        self._set_viewer_zoom(delta, pos=event.pos())
+        self._set_viewer_zoom(delta, pos=event.position())
 
     def dropEvent(self, event):
         pos = self.mapToScene(event.pos())
-        event.setDropAction(QtCore.Qt.CopyAction)
+        event.setDropAction(QtCore.Qt.DropAction.CopyAction)
         self.data_dropped.emit(
             event.mimeData(), QtCore.QPoint(pos.x(), pos.y())
         )
@@ -709,12 +710,12 @@ class NodeViewer(QtWidgets.QGraphicsView):
         Args:
             event (QtGui.QKeyEvent): key event.
         """
-        self.ALT_state = event.modifiers() == QtCore.Qt.AltModifier
-        self.CTRL_state = event.modifiers() == QtCore.Qt.ControlModifier
-        self.SHIFT_state = event.modifiers() == QtCore.Qt.ShiftModifier
+        self.ALT_state = event.modifiers() == QtCore.Qt.Modifier.ALT
+        self.CTRL_state = event.modifiers() == QtCore.Qt.Modifier.CTRL
+        self.SHIFT_state = event.modifiers() == QtCore.Qt.Modifier.SHIFT
 
         # Todo: find a better solution to catch modifier keys.
-        if event.modifiers() == (QtCore.Qt.AltModifier | QtCore.Qt.ShiftModifier):
+        if event.modifiers() == (QtCore.Qt.Modifier.ALT | QtCore.Qt.Modifier.SHIFT):
             self.ALT_state = True
             self.SHIFT_state = True
 
@@ -750,9 +751,9 @@ class NodeViewer(QtWidgets.QGraphicsView):
         Args:
             event (QtGui.QKeyEvent): key event.
         """
-        self.ALT_state = event.modifiers() == QtCore.Qt.AltModifier
-        self.CTRL_state = event.modifiers() == QtCore.Qt.ControlModifier
-        self.SHIFT_state = event.modifiers() == QtCore.Qt.ShiftModifier
+        self.ALT_state = event.modifiers() == QtCore.Qt.Modifier.ALT
+        self.CTRL_state = event.modifiers() == QtCore.Qt.Modifier.CTRL
+        self.SHIFT_state = event.modifiers() == QtCore.Qt.Modifier.SHIFT
         super(NodeViewer, self).keyReleaseEvent(event)
 
         # hide and reset cursor text.

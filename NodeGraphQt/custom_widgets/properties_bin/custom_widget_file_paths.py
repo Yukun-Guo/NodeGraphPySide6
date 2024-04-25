@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from Qt import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 
 from NodeGraphQt.widgets.dialogs import FileDialog
 from .prop_widgets_abstract import BaseProperty

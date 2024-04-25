@@ -1,6 +1,7 @@
 # virtual enviroment
 env/*
 venv/*
+.venv/*
 
 # sphinx documentation
 docs/_build/
