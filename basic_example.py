@@ -88,14 +88,16 @@ if __name__ == '__main__':
     n_text_input.set_output(0, n_custom_ports.input(0))
     n_text_input.set_output(0, n_checkbox.input(0))
     n_text_input.set_output(0, n_combo_menu.input(0))
+    
     # (connect nodes using the .set_input method)
     n_group.set_input(0, n_custom_ports.output(1))
     n_basic_b.set_input(2, n_checkbox.output(0))
     n_basic_b.set_input(2, n_combo_menu.output(1))
+    
     # (connect nodes using the .connect_to method from the port object)
-    port = n_basic_a.input(0)
-    port.connect_to(n_basic_b.output(0))
-
+    # n_basic_a.input(0).connect_to(n_basic_b.output(0))
+    n_basic_b.output(0).connect_to(n_basic_a.input(0))
+    
     # auto layout nodes.
     graph.auto_layout_nodes()
 

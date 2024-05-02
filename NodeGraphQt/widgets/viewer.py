@@ -199,8 +199,8 @@ class NodeViewer(QtWidgets.QGraphicsView):
 
         # setup the undo and redo actions.
         if self._undo_action and self._redo_action:
-            self._undo_action.setShortcuts(QtGui.QKeySequence.Undo)
-            self._redo_action.setShortcuts(QtGui.QKeySequence.Redo)
+            self._undo_action.setShortcuts(QtGui.QKeySequence.StandardKey.Undo)
+            self._redo_action.setShortcuts(QtGui.QKeySequence.StandardKey.Redo)
             if LooseVersion(QtCore.qVersion()) >= LooseVersion('5.10'):
                 self._undo_action.setShortcutVisibleInContextMenu(True)
                 self._redo_action.setShortcutVisibleInContextMenu(True)
@@ -267,7 +267,7 @@ class NodeViewer(QtWidgets.QGraphicsView):
         Redraw the scene.
         """
         self.setSceneRect(self._scene_range)
-        self.fitInView(self._scene_range, QtCore.Qt.KeepAspectRatio)
+        self.fitInView(self._scene_range, QtCore.Qt.AspectRatioMode.KeepAspectRatio)
 
     def _combined_rect(self, nodes):
         """
@@ -386,11 +386,11 @@ class NodeViewer(QtWidgets.QGraphicsView):
         return super(NodeViewer, self).contextMenuEvent(event)
 
     def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
             self.LMB_state = True
-        elif event.button() == QtCore.Qt.RightButton:
+        elif event.button() == QtCore.Qt.MouseButton.RightButton:
             self.RMB_state = True
-        elif event.button() == QtCore.Qt.MiddleButton:
+        elif event.button() == QtCore.Qt.MouseButton.MiddleButton:
             self.MMB_state = True
 
         self._origin_pos = event.pos()
@@ -617,7 +617,7 @@ class NodeViewer(QtWidgets.QGraphicsView):
                 self._rubber_band.setGeometry(rect)
 
                 self.scene().setSelectionArea(
-                    path, QtCore.Qt.ItemSelectionMode.IntersectsItemShape
+                    path, QtCore.Qt.ItemSelectionOperation.AddToSelection
                 )
                 self.scene().update(map_rect)
 
@@ -668,7 +668,7 @@ class NodeViewer(QtWidgets.QGraphicsView):
             delta = event.angleDelta().y()
             if delta == 0:
                 delta = event.angleDelta().x()
-        self._set_viewer_zoom(delta, pos=event.position())
+        self._set_viewer_zoom(delta, pos=event.position().toPoint())
 
     def dropEvent(self, event):
         pos = self.mapToScene(event.pos())

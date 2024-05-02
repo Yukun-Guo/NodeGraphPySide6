@@ -33,32 +33,32 @@ class SlicerPipeItem(QtWidgets.QGraphicsPathItem):
         arrow_size = 4.0
 
         painter.save()
-        painter.setRenderHint(painter.Antialiasing, True)
+        painter.setRenderHint(painter.RenderHint.Antialiasing, True)
 
         font = painter.font()
         font.setPointSize(12)
         painter.setFont(font)
         text = 'slice'
-        text_x = painter.fontMetrics().width(text) / 2
+        text_x = painter.fontMetrics().horizontalAdvance(text) / 2
         text_y = painter.fontMetrics().height() / 1.5
         text_pos = QtCore.QPointF(p1.x() - text_x, p1.y() - text_y)
         text_color = QtGui.QColor(*PipeSlicerEnum.COLOR.value)
         text_color.setAlpha(80)
         painter.setPen(QtGui.QPen(
-            text_color, PipeSlicerEnum.WIDTH.value, QtCore.Qt.SolidLine
+            text_color, PipeSlicerEnum.WIDTH.value, QtCore.Qt.PenStyle.SolidLine
         ))
         painter.drawText(text_pos, text)
 
         painter.setPen(QtGui.QPen(
-            color, PipeSlicerEnum.WIDTH.value, QtCore.Qt.DashDotLine
+            color, PipeSlicerEnum.WIDTH.value, QtCore.Qt.PenStyle.DashDotLine
         ))
         painter.drawPath(self.path())
 
         pen = QtGui.QPen(
-            color, PipeSlicerEnum.WIDTH.value, QtCore.Qt.SolidLine
+            color, PipeSlicerEnum.WIDTH.value, QtCore.Qt.PenStyle.SolidLine
         )
-        pen.setCapStyle(QtCore.Qt.RoundCap)
-        pen.setJoinStyle(QtCore.Qt.MiterJoin)
+        pen.setCapStyle(QtCore.Qt.PenCapStyle.RoundCap)
+        pen.setJoinStyle(QtCore.Qt.PenJoinStyle.MiterJoin)
         painter.setPen(pen)
         painter.setBrush(color)
 
