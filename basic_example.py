@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import signal
-
+import types
 from PySide6 import QtCore, QtWidgets
 
 from NodeGraphQt import (
@@ -24,14 +24,38 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication([])
 
+    
+    # careat a MainWindow
+    window = QtWidgets.QMainWindow()
+    window.setWindowTitle('NodeGraphQt - Basic Example')
+    menu_bar = window.menuBar()
+    file_menu = menu_bar.addMenu('Nodes')
+    file_menu.addAction('add node').triggered.connect(lambda: graph.create_node('nodes.basic.BasicNodeA'))
+    
     # create graph controller.
     graph = NodeGraph()
 
     # set up context menu for the node graph.
     graph.set_context_menu_from_file('./examples/hotkeys/hotkeys.json')
 
+    # dynamically create a function and execute it.
+    foo_code = compile('def foo(): return "bar"', "<string>", "exec")
+    foo_func = types.FunctionType(foo_code.co_consts[0], globals(), "foo")
+
+    print(foo_func())
+    
+    # dynamically define a node class based on BaseNode.
+    
+    DynamicNode = type('DynamicNode', (basic_nodes.BaseNode,), {
+        '__identifier__': 'nodes.dyBasic',
+        'NODE_NAME': 'Dynamic Node',
+        'init': lambda self: self.add_input('in A')
+    })
+    
+    
     # registered example nodes.
     graph.register_nodes([
+        DynamicNode,
         basic_nodes.BasicNodeA,
         basic_nodes.BasicNodeB,
         basic_nodes.CircleNode,
@@ -46,6 +70,11 @@ if __name__ == '__main__':
     graph_widget = graph.widget
     graph_widget.resize(1100, 800)
     graph_widget.show()
+
+    
+
+    # create nodes.
+    n_dynamic = graph.create_node('nodes.dyBasic.DynamicNode', text_color='#feabf0')
 
     # create node with custom text color and disable it.
     n_basic_a = graph.create_node(
