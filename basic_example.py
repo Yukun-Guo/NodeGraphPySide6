@@ -122,7 +122,16 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_AcceptTouchEvents, False)
         self.graph = NodeGraph()
         self.graph.set_context_menu_from_file("./examples/hotkeys/hotkeys.json")
+
         self.setCentralWidget(self.graph.widget)
+        self.dockWidgetNoteExplorer = QtWidgets.QDockWidget("Nodes Explorer")
+        self.addDockWidget(
+            QtCore.Qt.DockWidgetArea.LeftDockWidgetArea, self.dockWidgetNoteExplorer
+        )
+        self.dockWidgetProperties = QtWidgets.QDockWidget("Properties")
+        self.addDockWidget(
+            QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.dockWidgetProperties
+        )
 
     def setupInitalGraphy(self):
         # DynamicNode = createCustomNode(
