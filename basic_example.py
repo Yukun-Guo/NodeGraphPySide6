@@ -18,50 +18,65 @@ from examples.nodes import basic_nodes, custom_ports_node, group_node, widget_no
 
 def createCustomNode(
     nodeName: str,
-    inputPorts:list,#{'name': str,'multi_input':bool,'display_name':bool,'color':None,'locked':bool,'painter_func':None}=None,
-    outputPorts:list,#{'name': str,'multi_input':bool,'display_name':bool,'color':None,'locked':bool,'painter_func':None}=None,
-    elementDict: list#{'type':str,'name': str, 'label': str, 'text': str, 'placeholder_text': str, 'tooltip':Any|None,'tab':Any|None}=None,
+    inputPorts: list,  # {'name': str,'multi_input':bool,'display_name':bool,'color':None,'locked':bool,'painter_func':None}=None,
+    outputPorts: list,  # {'name': str,'multi_input':bool,'display_name':bool,'color':None,'locked':bool,'painter_func':None}=None,
+    elementDict: list,  # {'type':str,'name': str, 'label': str, 'text': str, 'placeholder_text': str, 'tooltip':Any|None,'tab':Any|None}=None,
 ):
-    code_str = f"""def __init__(self):
-                super(DynamicNode, self).__init__()
-                """
+    code_str = "def __init__(self):\tsuper(DynamicNode, self).__init__()\n"
     for inputPort in inputPorts:
-        code_str += f"self.add_input(name={inputPort['name']}), 
-        'multi_input={inputPort['multi_input']}',
-        'display_name={inputPort['display_name']}',
-        'color={inputPort['color']}',
-        'locked={inputPort['locked']}',
-        'painter_func={inputPort['painter_func']}')\n"
-    
+        code_str = (
+            code_str
+            + f"\tself.add_input(name={inputPort['name']},"
+            + f"multi_input={inputPort['multi_input']},"
+            + f"display_name={inputPort['display_name']},"
+            + f"color={inputPort['color']}, "
+            + f"locked={inputPort['locked']},"
+            + f"painter_func={inputPort['painter_func']})\n"
+        )
+
     for outputPort in outputPorts:
-        code_str += f"self.add_output(name={outputPort['name']}),
-        'multi_input={outputPort['multi_input']}',
-        'display_name={outputPort['display_name']}',
-        'color={outputPort['color']}',
-        'locked={outputPort['locked']}',
-        'painter_func={outputPort['painter_func']}')\n"
-        
+        code_str = (
+            code_str
+            + f"\tself.add_output(name={outputPort['name']},"
+            + f"multi_input={outputPort['multi_input']},"
+            + f"display_name={outputPort['display_name']},"
+            + f"color={outputPort['color']}, "
+            + f"locked={outputPort['locked']},"
+            + f"painter_func={outputPort['painter_func']})\n"
+        )
+
     for element in elementDict:
-        if element['type'] == 'text_input':
-            code_str += f"self.add_text_input('name={element['name']}', 
-            'label={element['label']}',
-            placeholder_text='{element['placeholder_text']}', 
-            tooltip='{element['tooltip']}', 
-            tab='{element['tab']}')\n"
-        elif element['type'] == 'combo_menu':
-            code_str += f"self.add_combo_menu('name={element['name']}', 
-            'label={element['label']}',
-            items={element['items']}, 
-            tooltip='{element['tooltip']}', 
-            tab='{element['tab']}')\n"
-        elif element['type'] == 'checkbox':
-            code_str += f"self.add_checkbox('name={element['name']}', 
-            'label={element['label']}',
-            'text={element['text']}',
-            'state={element['state']}',
-            tooltip='{element['tooltip']}', 
-            tab='{element['tab']}')\n"
-    
+        if element["type"] == "text_input":
+            code_str = (
+                code_str
+                + f"\tself.add_text_input(name={element['name']},"
+                + f"label={element['label']},"
+                + f"placeholder_text={element['placeholder_text']},"
+                + f"tooltip={element['tooltip']},"
+                + f"tab={element['tab']})\n"
+            )
+
+        elif element["type"] == "combo_menu":
+            code_str = (
+                code_str
+                + f"\tself.add_combo_menu(name={element['name']},"
+                + f"label={element['label']},"
+                + f"items={element['items']},"
+                + f"tooltip={element['tooltip']},"
+                + f"tab={element['tab']})\n"
+            )
+
+        elif element["type"] == "checkbox":
+            code_str = (
+                code_str
+                + f"\tself.add_checkbox(name={element['name']},"
+                + f"label={element['label']},"
+                + f"text={element['text']},"
+                + f"state={element['state']},"
+                + f"tooltip={element['tooltip']},"
+                + f"tab={element['tab']})\n"
+            )
+
     create_code = compile(
         code_str,
         "<string>",
@@ -79,7 +94,7 @@ def createCustomNode(
             "__init__": func,
         },
     )
-    
+
     return DynamicNode
 
 
@@ -100,28 +115,57 @@ if __name__ == "__main__":
 
     ######################################################################
     # dynamically create a function and execute it.
-
-    create_code = compile(
-        """def __init__(self):
-                super(DynamicNode, self).__init__()
-                self.add_input("in A")
-                self.add_output("out A")
-        """,
-        "<string>",
-        "exec",
-    )
-    foo_func = types.FunctionType(create_code.co_consts[0], globals(), "cratePort")
-
-    # dynamically define a node class based on BaseNode.
-    DynamicNode = type(
+    DynamicNode = createCustomNode(
         "DynamicNode",
-        (basic_nodes.BaseNode,),
-        {
-            "__identifier__": "nodes.dyBasic",
-            "NODE_NAME": "Dynamic Node",
-            "__init__": foo_func,
-        },
+        [
+            {
+                "name": "in A",
+                "multi_input": False,
+                "display_name": True,
+                "color": None,
+                "locked": False,
+                "painter_func": None,
+            }
+        ],
+        [
+            {
+                "name": "out A",
+                "multi_input": False,
+                "display_name": True,
+                "color": None,
+                "locked": False,
+                "painter_func": None,
+            }
+        ],
+        [
+            {
+                "type": "text_input",
+                "name": "text_input",
+                "label": "Text Input",
+                "placeholder_text": "type here",
+                "tooltip": None,
+                "tab": None,
+            },
+            {
+                "type": "combo_menu",
+                "name": "combo_menu",
+                "label": "Combo Menu",
+                "items": ["item1", "item2", "item3"],
+                "tooltip": None,
+                "tab": None,
+            },
+            {
+                "type": "checkbox",
+                "name": "checkbox",
+                "label": "Checkbox",
+                "text": "Check me",
+                "state": True,
+                "tooltip": None,
+                "tab": None,
+            },
+        ],
     )
+
     ######################################################################
     # registered example nodes.
     graph.register_nodes(
