@@ -7,23 +7,24 @@ class DropdownMenuNode(BaseNode):
     """
 
     # unique node identifier.
-    __identifier__ = 'nodes.widget'
+    __identifier__ = "nodes.widget"
 
     # initial default node name.
-    NODE_NAME = 'menu'
+    NODE_NAME = "menu"
 
     def __init__(self):
         super(DropdownMenuNode, self).__init__()
 
         # create input & output ports
-        self.add_input('in 1')
-        self.add_output('out 1')
-        self.add_output('out 2')
+        self.add_input("in 1")
+        self.add_output("out 1")
+        self.add_output("out 2")
 
         # create the QComboBox menu.
-        items = ['item 1', 'item 2', 'item 3']
-        self.add_combo_menu('my_menu', 'Menu Test', items=items,
-                            tooltip='example custom tooltip')
+        items = ["item 1", "item 2", "item 3"]
+        self.add_combo_menu(
+            "my_menu", "Menu Test", items=items, tooltip="example custom tooltip"
+        )
 
 
 class TextInputNode(BaseNode):
@@ -32,20 +33,21 @@ class TextInputNode(BaseNode):
     """
 
     # unique node identifier.
-    __identifier__ = 'nodes.widget'
+    __identifier__ = "nodes.widget"
 
     # initial default node name.
-    NODE_NAME = 'text'
+    NODE_NAME = "text"
 
     def __init__(self):
         super(TextInputNode, self).__init__()
 
         # create input & output ports
-        self.add_input('in')
-        self.add_output('out')
+        self.add_input("in")
+        self.add_output("out")
 
         # create QLineEdit text input widget.
-        self.add_text_input('my_input', 'Text Input', tab='widgets')
+        self.add_text_input("my_input", "Text Input", tab="widgets")
+        self.add_combo_menu
 
 
 class CheckboxNode(BaseNode):
@@ -54,18 +56,18 @@ class CheckboxNode(BaseNode):
     """
 
     # set a unique node identifier.
-    __identifier__ = 'nodes.widget'
+    __identifier__ = "nodes.widget"
 
     # set the initial default node name.
-    NODE_NAME = 'checkbox'
+    NODE_NAME = "checkbox"
 
     def __init__(self):
         super(CheckboxNode, self).__init__()
 
         # create the checkboxes.
-        self.add_checkbox('cb_1', '', 'Checkbox 1', True)
-        self.add_checkbox('cb_2', '', 'Checkbox 2', False)
+        self.add_checkbox("cb_1", "", "Checkbox 1", True)
+        self.add_checkbox("cb_2", "", "Checkbox 2", False)
 
         # create input and output port.
-        self.add_input('in', color=(200, 100, 0))
-        self.add_output('out', color=(0, 100, 200))
+        self.add_input("in", color=(200, 100, 0))
+        self.add_output("out", color=(0, 100, 200))
