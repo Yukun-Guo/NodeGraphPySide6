@@ -22,11 +22,14 @@ def createCustomNode(
     outputPorts: list,  # {'name': str,'multi_input':bool,'display_name':bool,'color':None,'locked':bool,'painter_func':None}=None,
     elementDict: list,  # {'type':str,'name': str, 'label': str, 'text': str, 'placeholder_text': str, 'tooltip':Any|None,'tab':Any|None}=None,
 ):
-    code_str = "def __init__(self):\tsuper(DynamicNode, self).__init__()\n"
+    # check if the node name is valid name for a class
+    if not nodeName.isidentifier():
+        raise ValueError("Invalid node name, must be a valid python class name")
+    code_str = "def __init__(self):\n\tsuper(" + nodeName + ", self).__init__()\n"
     for inputPort in inputPorts:
         code_str = (
             code_str
-            + f"\tself.add_input(name={inputPort['name']},"
+            + f"\tself.add_input(name='{inputPort['name']}',"
             + f"multi_input={inputPort['multi_input']},"
             + f"display_name={inputPort['display_name']},"
             + f"color={inputPort['color']}, "
@@ -37,7 +40,7 @@ def createCustomNode(
     for outputPort in outputPorts:
         code_str = (
             code_str
-            + f"\tself.add_output(name={outputPort['name']},"
+            + f"\tself.add_output(name='{outputPort['name']}',"
             + f"multi_input={outputPort['multi_input']},"
             + f"display_name={outputPort['display_name']},"
             + f"color={outputPort['color']}, "
@@ -49,34 +52,34 @@ def createCustomNode(
         if element["type"] == "text_input":
             code_str = (
                 code_str
-                + f"\tself.add_text_input(name={element['name']},"
-                + f"label={element['label']},"
-                + f"placeholder_text={element['placeholder_text']},"
-                + f"tooltip={element['tooltip']},"
-                + f"tab={element['tab']})\n"
+                + f"\tself.add_text_input(name='{element['name']}',"
+                + f"label='{element['label']}',"
+                + f"placeholder_text='{element['placeholder_text']}',"
+                + f"tooltip='{element['tooltip']}',"
+                + f"tab='{element['tab']}')\n"
             )
 
         elif element["type"] == "combo_menu":
             code_str = (
                 code_str
-                + f"\tself.add_combo_menu(name={element['name']},"
-                + f"label={element['label']},"
+                + f"\tself.add_combo_menu(name='{element['name']}',"
+                + f"label='{element['label']}',"
                 + f"items={element['items']},"
-                + f"tooltip={element['tooltip']},"
-                + f"tab={element['tab']})\n"
+                + f"tooltip='{element['tooltip']}',"
+                + f"tab='{element['tab']}')\n"
             )
 
         elif element["type"] == "checkbox":
             code_str = (
                 code_str
-                + f"\tself.add_checkbox(name={element['name']},"
-                + f"label={element['label']},"
-                + f"text={element['text']},"
+                + f"\tself.add_checkbox(name='{element['name']}',"
+                + f"label='{element['label']}',"
+                + f"text='{element['text']}',"
                 + f"state={element['state']},"
-                + f"tooltip={element['tooltip']},"
-                + f"tab={element['tab']})\n"
+                + f"tooltip='{element['tooltip']}',"
+                + f"tab='{element['tab']}')\n"
             )
-
+    print(code_str)
     create_code = compile(
         code_str,
         "<string>",
@@ -89,7 +92,7 @@ def createCustomNode(
         nodeName,
         (basic_nodes.BaseNode,),
         {
-            "__identifier__": "nodes." + nodeName.toLowerCase(),
+            "__identifier__": "nodes." + nodeName.lower(),
             "NODE_NAME": nodeName,
             "__init__": func,
         },
@@ -188,7 +191,7 @@ if __name__ == "__main__":
     graph_widget.show()
 
     # create nodes.
-    n_dynamic = graph.create_node("nodes.dyBasic.DynamicNode", text_color="#feabf0")
+    n_dynamic = graph.create_node("nodes.dynamicnode", text_color="#feabf0")
 
     # create node with custom text color and disable it.
     n_basic_a = graph.create_node("nodes.basic.BasicNodeA", text_color="#feab20")
