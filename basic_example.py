@@ -91,7 +91,7 @@ def createCustomNode(
         nodeName,
         (basic_nodes.BaseNode,),
         {
-            "__identifier__": "nodes." + nodeName.lower(),
+            "__identifier__": "nodes.custom.",
             "NODE_NAME": nodeName,
             "__init__": func,
         },
@@ -100,191 +100,377 @@ def createCustomNode(
     return DynamicNode
 
 
+class FlowNodeGraph(QtWidgets.QMainWindow):
+    graph = None
+
+    def __init__(self):
+        super(FlowNodeGraph, self).__init__()
+        self.initUI()
+        self.properties_bin = PropertiesBinWidget(node_graph=self.graph)
+        self.properties_bin.setWindowFlags(QtCore.Qt.WindowType.Tool)
+        self.setupInitalGraphy()
+
+        self.graph.node_double_clicked.connect(self.display_properties_bin)
+
+    def initUI(self):
+        # add menubar to main window.
+        self.menubar = self.menuBar()
+        self.file_menu = self.menubar.addMenu("File")
+        self.file_menu.addAction("New Node").triggered.connect(self.onCreateNode)
+        self.statusBar().showMessage("Ready")
+
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_AcceptTouchEvents, False)
+        self.graph = NodeGraph()
+        self.graph.set_context_menu_from_file("./examples/hotkeys/hotkeys.json")
+        self.setCentralWidget(self.graph.widget)
+
+    def setupInitalGraphy(self):
+        # DynamicNode = createCustomNode(
+        #     "DynamicNode",
+        #     [
+        #         {
+        #             "name": "in A",
+        #             "multi_input": False,
+        #             "display_name": True,
+        #             "color": None,
+        #             "locked": False,
+        #             "painter_func": None,
+        #         }
+        #     ],
+        #     [
+        #         {
+        #             "name": "out A",
+        #             "multi_output": False,
+        #             "display_name": True,
+        #             "color": None,
+        #             "locked": False,
+        #             "painter_func": None,
+        #         }
+        #     ],
+        #     [
+        #         {
+        #             "type": "text_input",
+        #             "name": "text_input",
+        #             "label": "Text Input",
+        #             "placeholder_text": "type here",
+        #             "tooltip": None,
+        #             "tab": None,
+        #         },
+        #         {
+        #             "type": "combo_menu",
+        #             "name": "combo_menu",
+        #             "label": "Combo Menu",
+        #             "items": ["item1", "item2", "item3"],
+        #             "tooltip": None,
+        #             "tab": None,
+        #         },
+        #         {
+        #             "type": "checkbox",
+        #             "name": "checkbox",
+        #             "label": "",
+        #             "text": "Check me",
+        #             "state": True,
+        #             "tooltip": None,
+        #             "tab": None,
+        #         },
+        #     ],
+        # )
+
+        # registered example nodes.
+        self.graph.register_nodes(
+            [
+                basic_nodes.BasicNodeA,
+                basic_nodes.BasicNodeB,
+                basic_nodes.CircleNode,
+                custom_ports_node.CustomPortsNode,
+                group_node.MyGroupNode,
+                widget_nodes.DropdownMenuNode,
+                widget_nodes.TextInputNode,
+                widget_nodes.CheckboxNode,
+            ]
+        )
+
+        # create nodes.
+        # n_dynamic = self.graph.create_node("nodes.custom.DynamicNode", text_color="#ffffff")
+
+        # # create node with custom text color and disable it.
+        # n_basic_a = self.graph.create_node("nodes.basic.BasicNodeA", text_color="#feab20")
+        # n_basic_a.set_disabled(True)
+
+        # # create node and set a custom icon.
+        # n_basic_b = self.graph.create_node("nodes.basic.BasicNodeB", name="custom icon")
+        # n_basic_b.set_icon(
+        #     os.path.join(os.path.dirname(os.path.abspath(__file__)), "star.png")
+        # )
+
+        # create node with custom text color and disable it.
+        n_basic_a = self.graph.create_node(
+            "nodes.basic.BasicNodeA", text_color="#feab20"
+        )
+        n_basic_a.set_disabled(True)
+
+        # create node and set a custom icon.
+        n_basic_b = self.graph.create_node("nodes.basic.BasicNodeB", name="custom icon")
+        n_basic_b.set_icon(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "star.png")
+        )
+
+        # create node with the custom port shapes.
+        n_custom_ports = self.graph.create_node(
+            "nodes.custom.ports.CustomPortsNode", name="custom ports"
+        )
+
+        # create node with the embedded QLineEdit widget.
+        n_text_input = self.graph.create_node(
+            "nodes.widget.TextInputNode", name="text node", color="#0a1e20"
+        )
+
+        # create node with the embedded QCheckBox widgets.
+        n_checkbox = self.graph.create_node(
+            "nodes.widget.CheckboxNode", name="checkbox node"
+        )
+
+        # create node with the QComboBox widget.
+        n_combo_menu = self.graph.create_node(
+            "nodes.widget.DropdownMenuNode", name="combobox node"
+        )
+
+        # crete node with the circular design.
+        n_circle = self.graph.create_node("nodes.basic.CircleNode", name="circle node")
+
+        # create group node.
+        n_group = self.graph.create_node("nodes.group.MyGroupNode")
+
+        # make node connections.
+
+        # (connect nodes using the .set_output method)
+        n_text_input.set_output(0, n_custom_ports.input(0))
+        n_text_input.set_output(0, n_checkbox.input(0))
+        n_text_input.set_output(0, n_combo_menu.input(0))
+
+        # (connect nodes using the .set_input method)
+        n_group.set_input(0, n_custom_ports.output(1))
+        n_basic_b.set_input(2, n_checkbox.output(0))
+        n_basic_b.set_input(2, n_combo_menu.output(1))
+
+        # (connect nodes using the .connect_to method from the port object)
+        # n_basic_a.input(0).connect_to(n_basic_b.output(0))
+        n_basic_b.output(0).connect_to(n_basic_a.input(0))
+
+        # auto layout nodes.
+        self.graph.auto_layout_nodes()
+
+        # crate a backdrop node and wrap it around
+        # "custom port node" and "group node".
+        n_backdrop = self.graph.create_node("Backdrop")
+        n_backdrop.wrap_nodes([n_custom_ports, n_combo_menu])
+
+        # fit nodes to the viewer.
+        self.graph.clear_selection()
+        self.graph.fit_to_selection()
+
+        # Custom builtin widgets from NodeGraphQt
+        # ---------------------------------------
+
+    # example show the node properties bin widget when a node is double-clicked.
+    def display_properties_bin(self):
+        if not self.properties_bin.isVisible():
+            self.properties_bin.show()
+
+    @QtCore.Slot()
+    def onCreateNode(self):
+        QtWidgets.QInputDialog.getText(
+            self,
+            "Create Node",
+            "Enter the name of the node you want to create",
+            QtWidgets.QLineEdit.Normal,
+            "",
+        )
+        # create a dialog to let user to create a new node.
+
+
 if __name__ == "__main__":
 
     # handle SIGINT to make the app terminate on CTRL+C
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-
     app = QtWidgets.QApplication([])
 
-    # create graph controller.
-    graph = NodeGraph()
+    mainWin = FlowNodeGraph()
+    mainWin.show()
+    app.exec()
 
-    # set up context menu for the node graph.
-    graph.set_context_menu_from_file("./examples/hotkeys/hotkeys.json")
+    # # create graph controller.
+    # graph = NodeGraph()
 
-    ######################################################################
-    # dynamically create a function and execute it.
-    DynamicNode = createCustomNode(
-        "DynamicNode",
-        [
-            {
-                "name": "in A",
-                "multi_input": False,
-                "display_name": True,
-                "color": None,
-                "locked": False,
-                "painter_func": None,
-            }
-        ],
-        [
-            {
-                "name": "out A",
-                "multi_output": False,
-                "display_name": True,
-                "color": None,
-                "locked": False,
-                "painter_func": None,
-            }
-        ],
-        [
-            {
-                "type": "text_input",
-                "name": "text_input",
-                "label": "Text Input",
-                "placeholder_text": "type here",
-                "tooltip": None,
-                "tab": None,
-            },
-            {
-                "type": "combo_menu",
-                "name": "combo_menu",
-                "label": "Combo Menu",
-                "items": ["item1", "item2", "item3"],
-                "tooltip": None,
-                "tab": None,
-            },
-            {
-                "type": "checkbox",
-                "name": "checkbox",
-                "label": "",
-                "text": "Check me",
-                "state": True,
-                "tooltip": None,
-                "tab": None,
-            },
-        ],
-    )
+    # # set up context menu for the node graph.
+    # graph.set_context_menu_from_file("./examples/hotkeys/hotkeys.json")
 
-    ######################################################################
-    # registered example nodes.
-    graph.register_nodes(
-        [
-            DynamicNode,
-            basic_nodes.BasicNodeA,
-            basic_nodes.BasicNodeB,
-            basic_nodes.CircleNode,
-            custom_ports_node.CustomPortsNode,
-            group_node.MyGroupNode,
-            widget_nodes.DropdownMenuNode,
-            widget_nodes.TextInputNode,
-            widget_nodes.CheckboxNode,
-        ]
-    )
+    # ######################################################################
+    # # dynamically create a function and execute it.
+    # DynamicNode = createCustomNode(
+    #     "DynamicNode",
+    #     [
+    #         {
+    #             "name": "in A",
+    #             "multi_input": False,
+    #             "display_name": True,
+    #             "color": None,
+    #             "locked": False,
+    #             "painter_func": None,
+    #         }
+    #     ],
+    #     [
+    #         {
+    #             "name": "out A",
+    #             "multi_output": False,
+    #             "display_name": True,
+    #             "color": None,
+    #             "locked": False,
+    #             "painter_func": None,
+    #         }
+    #     ],
+    #     [
+    #         {
+    #             "type": "text_input",
+    #             "name": "text_input",
+    #             "label": "Text Input",
+    #             "placeholder_text": "type here",
+    #             "tooltip": None,
+    #             "tab": None,
+    #         },
+    #         {
+    #             "type": "combo_menu",
+    #             "name": "combo_menu",
+    #             "label": "Combo Menu",
+    #             "items": ["item1", "item2", "item3"],
+    #             "tooltip": None,
+    #             "tab": None,
+    #         },
+    #         {
+    #             "type": "checkbox",
+    #             "name": "checkbox",
+    #             "label": "",
+    #             "text": "Check me",
+    #             "state": True,
+    #             "tooltip": None,
+    #             "tab": None,
+    #         },
+    #     ],
+    # )
 
-    # show the node graph widget.
-    graph_widget = graph.widget
-    graph_widget.resize(1100, 800)
-    graph_widget.show()
+    # ######################################################################
+    # # registered example nodes.
+    # graph.register_nodes(
+    #     [
+    #         DynamicNode,
+    #         basic_nodes.BasicNodeA,
+    #         basic_nodes.BasicNodeB,
+    #         basic_nodes.CircleNode,
+    #         custom_ports_node.CustomPortsNode,
+    #         group_node.MyGroupNode,
+    #         widget_nodes.DropdownMenuNode,
+    #         widget_nodes.TextInputNode,
+    #         widget_nodes.CheckboxNode,
+    #     ]
+    # )
 
-    # create nodes.
-    n_dynamic = graph.create_node("nodes.dynamicnode.DynamicNode", text_color="#ffffff")
+    # # show the node graph widget.
+    # graph_widget = graph.widget
+    # graph_widget.resize(1100, 800)
+    # graph_widget.show()
 
-    # create node with custom text color and disable it.
-    n_basic_a = graph.create_node("nodes.basic.BasicNodeA", text_color="#feab20")
-    n_basic_a.set_disabled(True)
+    # # create nodes.
+    # n_dynamic = self.graph.create_node("nodes.dynamicnode.DynamicNode", text_color="#ffffff")
 
-    # create node and set a custom icon.
-    n_basic_b = graph.create_node("nodes.basic.BasicNodeB", name="custom icon")
-    n_basic_b.set_icon(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "star.png")
-    )
+    # # create node with custom text color and disable it.
+    # n_basic_a = self.graph.create_node("nodes.basic.BasicNodeA", text_color="#feab20")
+    # n_basic_a.set_disabled(True)
 
-    # create node with the custom port shapes.
-    n_custom_ports = graph.create_node(
-        "nodes.custom.ports.CustomPortsNode", name="custom ports"
-    )
+    # # create node and set a custom icon.
+    # n_basic_b = self.graph.create_node("nodes.basic.BasicNodeB", name="custom icon")
+    # n_basic_b.set_icon(
+    #     os.path.join(os.path.dirname(os.path.abspath(__file__)), "star.png")
+    # )
 
-    # create node with the embedded QLineEdit widget.
-    n_text_input = graph.create_node(
-        "nodes.widget.TextInputNode", name="text node", color="#0a1e20"
-    )
+    # # create node with the custom port shapes.
+    # n_custom_ports = self.graph.create_node(
+    #     "nodes.custom.ports.CustomPortsNode", name="custom ports"
+    # )
 
-    # create node with the embedded QCheckBox widgets.
-    n_checkbox = graph.create_node("nodes.widget.CheckboxNode", name="checkbox node")
+    # # create node with the embedded QLineEdit widget.
+    # n_text_input = self.graph.create_node(
+    #     "nodes.widget.TextInputNode", name="text node", color="#0a1e20"
+    # )
 
-    # create node with the QComboBox widget.
-    n_combo_menu = graph.create_node(
-        "nodes.widget.DropdownMenuNode", name="combobox node"
-    )
+    # # create node with the embedded QCheckBox widgets.
+    # n_checkbox = self.graph.create_node("nodes.widget.CheckboxNode", name="checkbox node")
 
-    # crete node with the circular design.
-    n_circle = graph.create_node("nodes.basic.CircleNode", name="circle node")
+    # # create node with the QComboBox widget.
+    # n_combo_menu = self.graph.create_node(
+    #     "nodes.widget.DropdownMenuNode", name="combobox node"
+    # )
 
-    # create group node.
-    n_group = graph.create_node("nodes.group.MyGroupNode")
+    # # crete node with the circular design.
+    # n_circle = self.graph.create_node("nodes.basic.CircleNode", name="circle node")
 
-    # make node connections.
+    # # create group node.
+    # n_group = self.graph.create_node("nodes.group.MyGroupNode")
 
-    # (connect nodes using the .set_output method)
-    n_text_input.set_output(0, n_custom_ports.input(0))
-    n_text_input.set_output(0, n_checkbox.input(0))
-    n_text_input.set_output(0, n_combo_menu.input(0))
+    # # make node connections.
 
-    # (connect nodes using the .set_input method)
-    n_group.set_input(0, n_custom_ports.output(1))
-    n_basic_b.set_input(2, n_checkbox.output(0))
-    n_basic_b.set_input(2, n_combo_menu.output(1))
+    # # (connect nodes using the .set_output method)
+    # n_text_input.set_output(0, n_custom_ports.input(0))
+    # n_text_input.set_output(0, n_checkbox.input(0))
+    # n_text_input.set_output(0, n_combo_menu.input(0))
 
-    # (connect nodes using the .connect_to method from the port object)
-    # n_basic_a.input(0).connect_to(n_basic_b.output(0))
-    n_basic_b.output(0).connect_to(n_basic_a.input(0))
+    # # (connect nodes using the .set_input method)
+    # n_group.set_input(0, n_custom_ports.output(1))
+    # n_basic_b.set_input(2, n_checkbox.output(0))
+    # n_basic_b.set_input(2, n_combo_menu.output(1))
 
-    # auto layout nodes.
-    graph.auto_layout_nodes()
+    # # (connect nodes using the .connect_to method from the port object)
+    # # n_basic_a.input(0).connect_to(n_basic_b.output(0))
+    # n_basic_b.output(0).connect_to(n_basic_a.input(0))
 
-    # crate a backdrop node and wrap it around
-    # "custom port node" and "group node".
-    n_backdrop = graph.create_node("Backdrop")
-    n_backdrop.wrap_nodes([n_custom_ports, n_combo_menu])
+    # # auto layout nodes.
+    # graph.auto_layout_nodes()
 
-    # fit nodes to the viewer.
-    graph.clear_selection()
-    graph.fit_to_selection()
+    # # crate a backdrop node and wrap it around
+    # # "custom port node" and "group node".
+    # n_backdrop = self.graph.create_node("Backdrop")
+    # n_backdrop.wrap_nodes([n_custom_ports, n_combo_menu])
 
-    # Custom builtin widgets from NodeGraphQt
-    # ---------------------------------------
+    # # fit nodes to the viewer.
+    # graph.clear_selection()
+    # graph.fit_to_selection()
 
-    # create a node properties bin widget.
-    properties_bin = PropertiesBinWidget(node_graph=graph)
-    properties_bin.setWindowFlags(QtCore.Qt.Tool)
+    # # Custom builtin widgets from NodeGraphQt
+    # # ---------------------------------------
 
-    # example show the node properties bin widget when a node is double-clicked.
-    def display_properties_bin(node):
-        if not properties_bin.isVisible():
-            properties_bin.show()
+    # # create a node properties bin widget.
+    # properties_bin = PropertiesBinWidget(node_graph=graph)
+    # properties_bin.setWindowFlags(QtCore.Qt.Tool)
 
-    # wire function to "node_double_clicked" signal.
-    graph.node_double_clicked.connect(display_properties_bin)
+    # # wire function to "node_double_clicked" signal.
+    # graph.node_double_clicked.connect(display_properties_bin)
 
-    # create a nodes tree widget.
-    nodes_tree = NodesTreeWidget(node_graph=graph)
-    nodes_tree.set_category_label("nodeGraphQt.nodes", "Builtin Nodes")
-    nodes_tree.set_category_label("nodes.custom.ports", "Custom Port Nodes")
-    nodes_tree.set_category_label("nodes.widget", "Widget Nodes")
-    nodes_tree.set_category_label("nodes.basic", "Basic Nodes")
-    nodes_tree.set_category_label("nodes.group", "Group Nodes")
-    # nodes_tree.show()
+    # # create a nodes tree widget.
+    # nodes_tree = NodesTreeWidget(node_graph=graph)
+    # nodes_tree.set_category_label("nodeGraphQt.nodes", "Builtin Nodes")
+    # nodes_tree.set_category_label("nodes.custom.ports", "Custom Port Nodes")
+    # nodes_tree.set_category_label("nodes.widget", "Widget Nodes")
+    # nodes_tree.set_category_label("nodes.basic", "Basic Nodes")
+    # nodes_tree.set_category_label("nodes.group", "Group Nodes")
+    # # nodes_tree.show()
 
-    # create a node palette widget.
-    nodes_palette = NodesPaletteWidget(node_graph=graph)
-    nodes_palette.set_category_label("nodeGraphQt.nodes", "Builtin Nodes")
-    nodes_palette.set_category_label("nodes.custom.ports", "Custom Port Nodes")
-    nodes_palette.set_category_label("nodes.widget", "Widget Nodes")
-    nodes_palette.set_category_label("nodes.basic", "Basic Nodes")
-    nodes_palette.set_category_label("nodes.group", "Group Nodes")
+    # # create a node palette widget.
+    # nodes_palette = NodesPaletteWidget(node_graph=graph)
+    # nodes_palette.set_category_label("nodeGraphQt.nodes", "Builtin Nodes")
+    # nodes_palette.set_category_label("nodes.custom.ports", "Custom Port Nodes")
+    # nodes_palette.set_category_label("nodes.widget", "Widget Nodes")
+    # nodes_palette.set_category_label("nodes.basic", "Basic Nodes")
+    # nodes_palette.set_category_label("nodes.group", "Group Nodes")
     # nodes_palette.show()
 
-    app.exec()
+    # app.exec()
