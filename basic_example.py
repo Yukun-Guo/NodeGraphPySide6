@@ -41,7 +41,7 @@ def createCustomNode(
         code_str = (
             code_str
             + f"\tself.add_output(name='{outputPort['name']}',"
-            + f"multi_input={outputPort['multi_input']},"
+            + f"multi_output={outputPort['multi_output']},"
             + f"display_name={outputPort['display_name']},"
             + f"color={outputPort['color']}, "
             + f"locked={outputPort['locked']},"
@@ -79,7 +79,6 @@ def createCustomNode(
                 + f"tooltip='{element['tooltip']}',"
                 + f"tab='{element['tab']}')\n"
             )
-    print(code_str)
     create_code = compile(
         code_str,
         "<string>",
@@ -133,7 +132,7 @@ if __name__ == "__main__":
         [
             {
                 "name": "out A",
-                "multi_input": False,
+                "multi_output": False,
                 "display_name": True,
                 "color": None,
                 "locked": False,
@@ -160,7 +159,7 @@ if __name__ == "__main__":
             {
                 "type": "checkbox",
                 "name": "checkbox",
-                "label": "Checkbox",
+                "label": "",
                 "text": "Check me",
                 "state": True,
                 "tooltip": None,
@@ -191,7 +190,7 @@ if __name__ == "__main__":
     graph_widget.show()
 
     # create nodes.
-    n_dynamic = graph.create_node("nodes.dynamicnode", text_color="#feabf0")
+    n_dynamic = graph.create_node("nodes.dynamicnode.DynamicNode", text_color="#ffffff")
 
     # create node with custom text color and disable it.
     n_basic_a = graph.create_node("nodes.basic.BasicNodeA", text_color="#feab20")
