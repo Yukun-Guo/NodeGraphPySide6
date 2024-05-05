@@ -123,17 +123,13 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
     def dropEvent(self, e):
         super().dropEvent(e)
         position = e.position().toPoint()
-
+        print("dropEventPosition:", position)
+        position = self.graph.widget.mapFrom(self, position)
+        print("mapedPosition:", position)
         sender = e.source()
-        selectedRows = sender.selectionModel().selectedRows()[0].row()
-
-        # self.graph.create_node("nodes.basic.BasicNodeA", position=position)
-        # The QTableWidget from which selected rows will be moved
-        print(selectedRows)
-        # print(sender)
-        # Default dropEvent method fires dropMimeData with appropriate parameters (we're interested in the row index).
-
-        print(position)
+        selectedIdx = sender.selectionModel().selectedRows()[0].row()
+        nodeId = sender.topLevelItem(selectedIdx).text(1)
+        self.graph.create_node(node_type=nodeId, pos=[position.x(), position.y()])
         e.accept()
 
     def initUI(self):
@@ -156,7 +152,7 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         nodeWidgetLayout = QtWidgets.QVBoxLayout(
             nodeWidget, spacing=0, contentsMargins=QtCore.QMargins(0, 0, 0, 0)
         )
-        nodefilter = QtWidgets.QLineEdit()
+        nodefilter = QtWidgets.QLineEdit(textChanged=self.onFilterChanged)
         nodefilter.setPlaceholderText("Filter nodes...")
         nodeWidgetLayout.addWidget(nodefilter)
         createNewNodeButton = QtWidgets.QPushButton("Create New Node")
@@ -184,6 +180,7 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         for nodeClass in nodeClasses:
             item = QtWidgets.QTreeWidgetItem()
             item.setText(0, nodeClass[0])
+            item.setText(1, nodeClass[1].__identifier__ + "." + nodeClass[0])
             item.setIcon(
                 0,
                 QtGui.QIcon(
@@ -193,83 +190,9 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
             self.nodesTree.addTopLevelItem(item)
 
     def setupInitalGraphy(self):
-        # DynamicNode = createCustomNode(
-        #     "DynamicNode",
-        #     [
-        #         {
-        #             "name": "in A",
-        #             "multi_input": False,
-        #             "display_name": True,
-        #             "color": None,
-        #             "locked": False,
-        #             "painter_func": None,
-        #         }
-        #     ],
-        #     [
-        #         {
-        #             "name": "out A",
-        #             "multi_output": False,
-        #             "display_name": True,
-        #             "color": None,
-        #             "locked": False,
-        #             "painter_func": None,
-        #         }
-        #     ],
-        #     [
-        #         {
-        #             "type": "text_input",
-        #             "name": "text_input",
-        #             "label": "Text Input",
-        #             "placeholder_text": "type here",
-        #             "tooltip": None,
-        #             "tab": None,
-        #         },
-        #         {
-        #             "type": "combo_menu",
-        #             "name": "combo_menu",
-        #             "label": "Combo Menu",
-        #             "items": ["item1", "item2", "item3"],
-        #             "tooltip": None,
-        #             "tab": None,
-        #         },
-        #         {
-        #             "type": "checkbox",
-        #             "name": "checkbox",
-        #             "label": "",
-        #             "text": "Check me",
-        #             "state": True,
-        #             "tooltip": None,
-        #             "tab": None,
-        #         },
-        #     ],
-        # )
 
-        # registered example nodes.
-        self.graph.register_nodes(
-            [
-                basic_nodes.BasicNodeA,
-                basic_nodes.BasicNodeB,
-                basic_nodes.CircleNode,
-                custom_ports_node.CustomPortsNode,
-                group_node.MyGroupNode,
-                widget_nodes.DropdownMenuNode,
-                widget_nodes.TextInputNode,
-                widget_nodes.CheckboxNode,
-            ]
-        )
-
-        # create nodes.
-        # n_dynamic = self.graph.create_node("nodes.custom.DynamicNode", text_color="#ffffff")
-
-        # # create node with custom text color and disable it.
-        # n_basic_a = self.graph.create_node("nodes.basic.BasicNodeA", text_color="#feab20")
-        # n_basic_a.set_disabled(True)
-
-        # # create node and set a custom icon.
-        # n_basic_b = self.graph.create_node("nodes.basic.BasicNodeB", name="custom icon")
-        # n_basic_b.set_icon(
-        #     os.path.join(os.path.dirname(os.path.abspath(__file__)), "star.png")
-        # )
+        nodeClasses = inspect.getmembers(PresetNotes, inspect.isclass)
+        self.graph.register_nodes([nodeClass[1] for nodeClass in nodeClasses])
 
         # create node with custom text color and disable it.
         n_basic_a = self.graph.create_node(
@@ -355,6 +278,13 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
             "",
         )
         # create a dialog to let user to create a new node.
+
+    @QtCore.Slot(str)
+    def onFilterChanged(self, text: str):
+        # filter the node explorer tree items based on the text.
+        for i in range(self.nodesTree.topLevelItemCount()):
+            item = self.nodesTree.topLevelItem(i)
+            item.setHidden(text.lower() not in item.text(0).lower())
 
 
 if __name__ == "__main__":
