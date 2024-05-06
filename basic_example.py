@@ -129,7 +129,10 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         sender = e.source()
         selectedIdx = sender.selectionModel().selectedRows()[0].row()
         nodeId = sender.topLevelItem(selectedIdx).text(1)
-        self.graph.create_node(node_type=nodeId, pos=[position.x(), position.y()])
+        cp = self.graph.viewer().scene_center()
+        p = position.x() - cp[0] * 2, position.y() - cp[1] * 2
+        print("p:", p)
+        self.graph.create_node(node_type=nodeId, pos=p)
         e.accept()
 
     def initUI(self):
