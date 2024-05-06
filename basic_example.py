@@ -115,8 +115,6 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         self.setupInitalGraphy()
         self.updateNodeExplorer()
         self.graph.node_double_clicked.connect(self.display_properties_bin)
-        self.nodes_palette = NodesPaletteWidget(node_graph=self.graph)
-        self.nodes_palette.show()
 
     def dragEnterEvent(self, e):
         print("dragEnterEvent")
@@ -129,7 +127,8 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         position = self.graph._viewer.mapToScene(position)
         sender = e.source()
         selectedIdx = sender.selectionModel().selectedRows()[0].row()
-        nodeId = sender.topLevelItem(selectedIdx).text(1)
+        nodeId = sender.selectedIndexes()[0].data()
+        # nodeId = sender.topLevelItem(selectedIdx).text(1)
         p = position.x() - 20, position.y() - 20
         self.graph.create_node(node_type=nodeId, pos=p)
         e.accept()
@@ -183,17 +182,36 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         self.nodesTree.clear()
         nodeClasses = inspect.getmembers(PresetNotes, inspect.isclass)
         # create tree widget items for each node class, each tree item has a icon and a text.
+        # for nodeClass in nodeClasses:
+        #     item = QtWidgets.QTreeWidgetItem()
+        #     item.setText(0, nodeClass[0])
+        #     item.setText(1, nodeClass[1].__identifier__ + "." + nodeClass[0])
+        #     item.setIcon(
+        #         0,
+        #         QtGui.QIcon(
+        #             os.path.join(os.path.dirname(os.path.abspath(__file__)), "star.png")
+        #         ),
+        #     )
+        #     self.nodesTree.addTopLevelItem(item)
+
+        # get all __indentifier__ from each class, and add the unique ones to the tree
+        identifiers = []
         for nodeClass in nodeClasses:
+            identifiers.append(nodeClass[1].__identifier__)
+        identifiers = list(set(identifiers))
+
+        # add thoses identifiers to the tree as top level items, and add the classes name as children
+        for identifier in identifiers:
             item = QtWidgets.QTreeWidgetItem()
-            item.setText(0, nodeClass[0])
-            item.setText(1, nodeClass[1].__identifier__ + "." + nodeClass[0])
-            item.setIcon(
-                0,
-                QtGui.QIcon(
-                    os.path.join(os.path.dirname(os.path.abspath(__file__)), "star.png")
-                ),
-            )
+            item.setText(0, identifier)
+            item.setExpanded(True)
             self.nodesTree.addTopLevelItem(item)
+            for nodeClass in nodeClasses:
+                if nodeClass[1].__identifier__ == identifier:
+                    child = QtWidgets.QTreeWidgetItem()
+                    child.setText(0, nodeClass[0])
+                    child.setText(1, nodeClass[1].__identifier__ + "." + nodeClass[0])
+                    item.addChild(child)
 
     def setupInitalGraphy(self):
 
@@ -288,9 +306,20 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
     @QtCore.Slot(str)
     def onFilterChanged(self, text: str):
         # filter the node explorer tree items based on the text.
+        # for i in range(self.nodesTree.topLevelItemCount()):
+        #     item = self.nodesTree.topLevelItem(i)
+        #     item.setHidden(text.lower() not in item.text(0).lower())
+
+        # filter the node explorer tree items based on the text,hide the parent if no child is visible
         for i in range(self.nodesTree.topLevelItemCount()):
             item = self.nodesTree.topLevelItem(i)
-            item.setHidden(text.lower() not in item.text(0).lower())
+            parentHidden = True
+            for j in range(item.childCount()):
+                child = item.child(j)
+                child.setHidden(text.lower() not in child.text(0).lower())
+                if not child.isHidden():
+                    parentHidden = False
+            item.setHidden(parentHidden)
 
 
 if __name__ == "__main__":
