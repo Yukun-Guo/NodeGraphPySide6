@@ -30,7 +30,7 @@ class _NodesGridDelegate(QtWidgets.QStyledItemDelegate):
             option.rect.x() + sub_margin,
             option.rect.y() + sub_margin,
             option.rect.width() - (sub_margin * 2),
-            option.rect.height() - (sub_margin * 2)
+            option.rect.height() - (sub_margin * 2),
         )
 
         painter.save()
@@ -47,9 +47,9 @@ class _NodesGridDelegate(QtWidgets.QStyledItemDelegate):
         pen.setCapStyle(QtCore.Qt.RoundCap)
         painter.setPen(pen)
         painter.setBrush(QtGui.QBrush(bg_color))
-        painter.drawRoundedRect(base_rect,
-                              int(base_rect.height()/radius),
-                              int(base_rect.width()/radius))
+        painter.drawRoundedRect(
+            base_rect, int(base_rect.height() / radius), int(base_rect.width() / radius)
+        )
 
         if option.state & QtWidgets.QStyle.State_Selected:
             pen_color = option.palette.highlight().color()
@@ -65,11 +65,11 @@ class _NodesGridDelegate(QtWidgets.QStyledItemDelegate):
             base_rect.x() + sub_margin,
             base_rect.y() + sub_margin,
             base_rect.width() - (sub_margin * 2),
-            base_rect.height() - (sub_margin * 2)
+            base_rect.height() - (sub_margin * 2),
         )
-        painter.drawRoundedRect(sub_rect,
-                              int(sub_rect.height() / radius),
-                              int(sub_rect.width() / radius))
+        painter.drawRoundedRect(
+            sub_rect, int(sub_rect.height() / radius), int(sub_rect.width() / radius)
+        )
 
         painter.setBrush(QtGui.QBrush(pen_color))
         edge_size = 2, sub_rect.height() - 6
@@ -78,9 +78,7 @@ class _NodesGridDelegate(QtWidgets.QStyledItemDelegate):
         pos_y = sub_rect.center().y() - (edge_size[1] / 2)
 
         for pos_x in [left_x, right_x]:
-            painter.drawRect(QtCore.QRectF(
-                pos_x, pos_y, edge_size[0], edge_size[1]
-            ))
+            painter.drawRect(QtCore.QRectF(pos_x, pos_y, edge_size[0], edge_size[1]))
 
         # painter.setPen(QtCore.Qt.NoPen)
         painter.setBrush(QtGui.QBrush(bg_color))
@@ -89,9 +87,7 @@ class _NodesGridDelegate(QtWidgets.QStyledItemDelegate):
         right_x = sub_rect.right() - (dot_size - 1)
         pos_y = sub_rect.center().y() - (dot_size / 2)
         for pos_x in [left_x, right_x]:
-            painter.drawEllipse(QtCore.QRectF(
-                pos_x, pos_y, dot_size, dot_size
-            ))
+            painter.drawEllipse(QtCore.QRectF(pos_x, pos_y, dot_size, dot_size))
             pos_x -= dot_size + 2
 
         # text
@@ -102,8 +98,8 @@ class _NodesGridDelegate(QtWidgets.QStyledItemDelegate):
 
         font = painter.font()
         font_metrics = QtGui.QFontMetrics(font)
-        item_text = item.text().replace(' ', '_')
-        if hasattr(font_metrics, 'horizontalAdvance'):
+        item_text = item.text().replace(" ", "_")
+        if hasattr(font_metrics, "horizontalAdvance"):
             font_width = font_metrics.horizontalAdvance(item_text)
         else:
             font_width = font_metrics.width(item_text)
@@ -111,7 +107,9 @@ class _NodesGridDelegate(QtWidgets.QStyledItemDelegate):
         text_rect = QtCore.QRectF(
             sub_rect.center().x() - (font_width / 2),
             sub_rect.center().y() - (font_height * 0.55),
-            font_width, font_height)
+            font_width,
+            font_height,
+        )
         painter.drawText(text_rect, item.text())
         painter.restore()
 
@@ -120,13 +118,10 @@ class _NodesGridProxyModel(QtCore.QSortFilterProxyModel):
 
     def __init__(self, parent=None):
         super(_NodesGridProxyModel, self).__init__(parent)
-        
+
     def mimeData(self, indexes, p_int=None):
-        node_ids = [
-            'node:{}'.format(i.data(QtCore.Qt.ToolTipRole))
-            for i in indexes
-        ]
-        node_urn = URN_SCHEME + ';'.join(node_ids)
+        node_ids = ["node:{}".format(i.data(QtCore.Qt.ToolTipRole)) for i in indexes]
+        node_urn = URN_SCHEME + ";".join(node_ids)
         mime_data = QtCore.QMimeData()
         mime_data.setData(MIME_TYPE, QtCore.QByteArray(node_urn.encode()))
         return mime_data
@@ -154,7 +149,7 @@ class NodesGridView(QtWidgets.QListView):
     def clear(self):
         self.model().sourceModel().clear()
 
-    def add_item(self, label, tooltip=''):
+    def add_item(self, label, tooltip=""):
         item = QtGui.QStandardItem(label)
         item.setSizeHint(QtCore.QSize(130, 40))
         item.setToolTip(tooltip)
@@ -195,7 +190,7 @@ class NodesPaletteWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None, node_graph=None):
         super(NodesPaletteWidget, self).__init__(parent)
-        self.setWindowTitle('Nodes')
+        self.setWindowTitle("Nodes")
 
         self._category_tabs = {}
         self._custom_labels = {}
@@ -213,9 +208,7 @@ class NodesPaletteWidget(QtWidgets.QWidget):
         node_graph.nodes_registered.connect(self._on_nodes_registered)
 
     def __repr__(self):
-        return '<{} object at {}>'.format(
-            self.__class__.__name__, hex(id(self))
-        )
+        return "<{} object at {}>".format(self.__class__.__name__, hex(id(self)))
 
     def _on_nodes_registered(self, nodes):
         """
@@ -228,7 +221,7 @@ class NodesPaletteWidget(QtWidgets.QWidget):
         for node in nodes:
             name = node.NODE_NAME
             node_type = node.type_
-            category = '.'.join(node_type.split('.')[:-1])
+            category = ".".join(node_type.split(".")[:-1])
             node_types[category].append((node_type, name))
 
         update_tabs = False
@@ -246,8 +239,9 @@ class NodesPaletteWidget(QtWidgets.QWidget):
         """
         Update the tab labels.
         """
-        tabs_idx = {self._tab_widget.tabText(x): x
-                    for x in range(self._tab_widget.count())}
+        tabs_idx = {
+            self._tab_widget.tabText(x): x for x in range(self._tab_widget.count())
+        }
         for category, label in self._custom_labels.items():
             if category in tabs_idx:
                 idx = tabs_idx[category]
@@ -260,7 +254,7 @@ class NodesPaletteWidget(QtWidgets.QWidget):
         node_types = defaultdict(list)
         for name, node_ids in self._factory.names.items():
             for nid in node_ids:
-                category = '.'.join(nid.split('.')[:-1])
+                category = ".".join(nid.split(".")[:-1])
                 node_types[category].append((nid, name))
 
         for category, nodes_list in node_types.items():
@@ -303,9 +297,10 @@ class NodesPaletteWidget(QtWidgets.QWidget):
         """
         if label in self._custom_labels.values():
             labels = {v: k for k, v in self._custom_labels.items()}
-            raise ValueError('label "{}" already in use for "{}"'
-                             .format(label, labels[label]))
-        previous_label = self._custom_labels.get(category, '')
+            raise ValueError(
+                'label "{}" already in use for "{}"'.format(label, labels[label])
+            )
+        previous_label = self._custom_labels.get(category, "")
         for idx in range(self._tab_widget.count()):
             tab_text = self._tab_widget.tabText(idx)
             if tab_text in [category, previous_label]:
@@ -332,7 +327,7 @@ class NodesPaletteWidget(QtWidgets.QWidget):
         node_types = defaultdict(list)
         for name, node_ids in self._factory.names.items():
             for nid in node_ids:
-                category = '.'.join(nid.split('.')[:-1])
+                category = ".".join(nid.split(".")[:-1])
                 node_types[category].append((nid, name))
 
         for category, nodes_list in node_types.items():

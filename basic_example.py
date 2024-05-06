@@ -115,6 +115,8 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         self.setupInitalGraphy()
         self.updateNodeExplorer()
         self.graph.node_double_clicked.connect(self.display_properties_bin)
+        self.nodes_palette = NodesPaletteWidget(node_graph=self.graph)
+        self.nodes_palette.show()
 
     def dragEnterEvent(self, e):
         print("dragEnterEvent")
@@ -123,15 +125,14 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
     def dropEvent(self, e):
         super().dropEvent(e)
         position = e.position().toPoint()
+        position = self.centralWidget().mapFromParent(position)
         print("dropEventPosition:", position)
-        position = self.graph.widget.mapFrom(self, position)
+        position = self.graph._viewer.mapToScene(position)
         print("mapedPosition:", position)
         sender = e.source()
         selectedIdx = sender.selectionModel().selectedRows()[0].row()
         nodeId = sender.topLevelItem(selectedIdx).text(1)
-        cp = self.graph.viewer().scene_center()
-        p = position.x() - cp[0] * 2, position.y() - cp[1] * 2
-        print("p:", p)
+        p = position.x() - 20, position.y() - 20
         self.graph.create_node(node_type=nodeId, pos=p)
         e.accept()
 
