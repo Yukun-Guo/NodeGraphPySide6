@@ -126,9 +126,7 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         super().dropEvent(e)
         position = e.position().toPoint()
         position = self.centralWidget().mapFromParent(position)
-        print("dropEventPosition:", position)
         position = self.graph._viewer.mapToScene(position)
-        print("mapedPosition:", position)
         sender = e.source()
         selectedIdx = sender.selectionModel().selectedRows()[0].row()
         nodeId = sender.topLevelItem(selectedIdx).text(1)
@@ -147,6 +145,10 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
 
         # create node graph.
         self.graph = NodeGraph()
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_AcceptTouchEvents, False)
+        self.graph._viewer.setAttribute(
+            QtCore.Qt.WidgetAttribute.WA_AcceptTouchEvents, False
+        )
         self.graph.set_context_menu_from_file("./examples/hotkeys/hotkeys.json")
         self.setCentralWidget(self.graph.widget)
 
