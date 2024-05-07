@@ -117,8 +117,15 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         self.graph.node_double_clicked.connect(self.display_properties_bin)
 
     def dragEnterEvent(self, e):
-        print("dragEnterEvent")
-        e.accept()
+        # if the item being dragged is a node from the node explorer, and the item is top level, refuse the event.
+        if (
+            e.source() == self.nodesTree
+            and e.source().selectedIndexes()[0].parent().data() is None
+        ):
+            print("refuse")
+            e.ignore()
+        else:
+            e.accept()
 
     def dropEvent(self, e):
         super().dropEvent(e)
@@ -126,11 +133,10 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         position = self.centralWidget().mapFromParent(position)
         position = self.graph._viewer.mapToScene(position)
         sender = e.source()
-        selectedIdx = sender.selectionModel().selectedRows()[0].row()
         nodeId = sender.selectedIndexes()[0].data()
-        # nodeId = sender.topLevelItem(selectedIdx).text(1)
+        gp = sender.selectedIndexes()[0].parent().data()
         p = position.x() - 20, position.y() - 20
-        self.graph.create_node(node_type=nodeId, pos=p)
+        self.graph.create_node(node_type=gp + "." + nodeId, pos=p)
         e.accept()
 
     def initUI(self):
@@ -204,7 +210,6 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         for identifier in identifiers:
             item = QtWidgets.QTreeWidgetItem()
             item.setText(0, identifier)
-            item.setExpanded(True)
             self.nodesTree.addTopLevelItem(item)
             for nodeClass in nodeClasses:
                 if nodeClass[1].__identifier__ == identifier:
@@ -212,6 +217,7 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
                     child.setText(0, nodeClass[0])
                     child.setText(1, nodeClass[1].__identifier__ + "." + nodeClass[0])
                     item.addChild(child)
+        self.nodesTree.expandAll()
 
     def setupInitalGraphy(self):
 
