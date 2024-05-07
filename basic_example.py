@@ -205,6 +205,7 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         # add thoses identifiers to the tree as top level items, and add the classes name as children
         for identifier in identifiers:
             item = QtWidgets.QTreeWidgetItem()
+            item.setBackground(0, QtGui.QColor(55, 55, 55, 80))
             item.setText(0, identifier)
             self.nodesTree.addTopLevelItem(item)
             for nodeClass in nodeClasses:
