@@ -163,10 +163,19 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         nodeWidgetLayout = QtWidgets.QVBoxLayout(
             nodeWidget, spacing=0, contentsMargins=QtCore.QMargins(0, 0, 0, 0)
         )
-        nodefilter = QtWidgets.QLineEdit(textChanged=self.onFilterChanged)
-        nodefilter.setPlaceholderText("Filter nodes...")
-        nodeWidgetLayout.addWidget(nodefilter)
+        self.nodefilter = QtWidgets.QLineEdit(textChanged=self.onFilterChanged)
+        self.nodefilter.setPlaceholderText("Filter nodes...")
+        refreshButton = QtWidgets.QPushButton("Refresh")
+        refreshButton.clicked.connect(self.updateNodeExplorer)
+        filterandrefresh = QtWidgets.QHBoxLayout(
+            nodeWidget, spacing=0, contentsMargins=QtCore.QMargins(0, 0, 0, 0)
+        )
+        filterandrefresh.setContentsMargins(0, 0, 0, 0)
+        filterandrefresh.addWidget(self.nodefilter)
+        filterandrefresh.addWidget(refreshButton)
+        nodeWidgetLayout.addLayout(filterandrefresh)
         createNewNodeButton = QtWidgets.QPushButton("Create New Node")
+
         createNewNodeButton.clicked.connect(self.onCreateNode)
         nodeWidgetLayout.addWidget(createNewNodeButton)
         self.dockWidgetNoteExplorer.setWidget(nodeWidget)
@@ -186,21 +195,8 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
 
     def updateNodeExplorer(self):
         self.nodesTree.clear()
+        self.nodefilter.clear()
         nodeClasses = inspect.getmembers(PresetNotes, inspect.isclass)
-        # create tree widget items for each node class, each tree item has a icon and a text.
-        # for nodeClass in nodeClasses:
-        #     item = QtWidgets.QTreeWidgetItem()
-        #     item.setText(0, nodeClass[0])
-        #     item.setText(1, nodeClass[1].__identifier__ + "." + nodeClass[0])
-        #     item.setIcon(
-        #         0,
-        #         QtGui.QIcon(
-        #             os.path.join(os.path.dirname(os.path.abspath(__file__)), "star.png")
-        #         ),
-        #     )
-        #     self.nodesTree.addTopLevelItem(item)
-
-        # get all __indentifier__ from each class, and add the unique ones to the tree
         identifiers = []
         for nodeClass in nodeClasses:
             identifiers.append(nodeClass[1].__identifier__)
